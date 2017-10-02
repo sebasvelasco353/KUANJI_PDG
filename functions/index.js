@@ -29,7 +29,7 @@ app.get('/predict', function(req, res) {
 });
 
 //------------ Function used for retreiving all image links in the format link -> tag 1, 2 and 3
-app.get('/retreiveAllLinks', function(req, res) {
+app.get('/retrieveAllLinks', function(req, res) {
   // arreglo donde guardo los links temporalmente para enviarlos
   var arreglo_links = [];
   refLinks.once("value", function(data) {
