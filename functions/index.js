@@ -5,7 +5,7 @@ const admin = require("firebase-admin");
 const express = require('express');
 const app = express();
 var db = admin.database();
-var ref = db.ref('/');
+var refLinks = db.ref('/links');
 const clarifaiApp = new Clarifai.App({
   apiKey: 'b71dea8696994f2f896b4cfa9f667b7d'
 });
@@ -17,7 +17,9 @@ app.get('/predict', function(req, res) {
   var toPredict = req.query.link; //https://samples.clarifai.com/metro-north.jpg
   clarifaiApp.models.predict(Clarifai.GENERAL_MODEL, toPredict).then(
     function(response) {
-      res.json(response.rawData);
+      res.json(response.rawData.outputs);
+
+      //TODO: take 3 tags with higher percentage of coincidense and also to filtering by: things that say no mus be taken out, like : no human or no pet
     },
     function(err) {
       // there was an error
@@ -28,7 +30,16 @@ app.get('/predict', function(req, res) {
 
 //------------ Function used for retreiving all image links in the format link -> tag 1, 2 and 3
 app.get('/retreiveAllLinks', function(req, res) {
-
+  // arreglo donde guardo los links temporalmente para enviarlos
+  var arreglo_links = [];
+  refLinks.once("value", function(data) {
+    data.forEach(function(cadaLinkSnapshot) {
+      var snapTemp = cadaLinkSnapshot.val();
+      arreglo_links.push(snapTemp);
+    });
+  }).then(function(data) {
+    res.json(arreglo_links);
+  });
 });
 
 //------------ Function used for retreiving all image links from All tags in the format tag -> link 1, 2 ... n
