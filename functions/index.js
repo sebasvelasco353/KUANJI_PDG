@@ -6,6 +6,7 @@ const express = require('express');
 const app = express();
 var db = admin.database();
 var refLinks = db.ref('/links');
+var refTags = db.ref('/tags');
 const clarifaiApp = new Clarifai.App({
   apiKey: 'b71dea8696994f2f896b4cfa9f667b7d'
 });
@@ -44,7 +45,16 @@ app.get('/retrieveAllLinks', function(req, res) {
 
 //------------ Function used for retreiving all image links from All tags in the format tag -> link 1, 2 ... n
 app.get('/retreiveAllTags', function(req, res) {
-
+  // arreglo donde guardo los links temporalmente para enviarlos
+  var arreglo_tags = [];
+  refLinks.once("value", function(data) {
+    data.forEach(function(cadaTagSnapshot) {
+      var snapTemp = cadaTagSnapshot.val();
+      arreglo_tags.push(snapTemp);
+    });
+  }).then(function(data) {
+    res.json(arreglo_tags);
+  });
 });
 
 //------------ Function used for retreiving all image links from one specific tag in the format tag -> link 1, 2 ... n
