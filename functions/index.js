@@ -30,7 +30,7 @@ app.get('/predict', function(req, res) {
 });
 
 //------------ Function used for retreiving all image links in the format link -> tag 1, 2 and 3
-app.get('/retrieveAllLinks', function(req, res) {
+app.get('/getAllLinks', function(req, res) {
   // arreglo donde guardo los links temporalmente para enviarlos
   var arreglo_links = [];
   refLinks.once("value", function(data) {
@@ -44,10 +44,10 @@ app.get('/retrieveAllLinks', function(req, res) {
 });
 
 //------------ Function used for retreiving all image links from All tags in the format tag -> link 1, 2 ... n
-app.get('/retreiveAllTags', function(req, res) {
+app.get('/getAllTags', function(req, res) {
   // arreglo donde guardo los links temporalmente para enviarlos
   var arreglo_tags = [];
-  refLinks.once("value", function(data) {
+  refTags.once("value", function(data) {
     data.forEach(function(cadaTagSnapshot) {
       var snapTemp = cadaTagSnapshot.val();
       arreglo_tags.push(snapTemp);
@@ -58,20 +58,20 @@ app.get('/retreiveAllTags', function(req, res) {
 });
 
 //------------ Function used for retreiving all image links from one specific tag in the format tag -> link 1, 2 ... n
-app.get('/retreiveSpecificTag', function(req, res) {
+app.get('/getSpecificTag', function(req, res) {
   // arreglo donde guardo los links temporalmente para enviarlos
   var arreglo_imagenesPorTag = [];
   //get the tag needed
-var tagToBeSearched = req.query.toBeSearched;
+  var tagSearch = req.query.tagSearch;
   // query for calling all images onspecific tag
-  const query = refTags.orderByChild(toBeSearched)
+  const query = refTags.orderByChild('tag').equalTo(tagSearch);
     query.once("value", function(data) {
-    data.forEach(function(cadaImgTagSnapshot) {
-      var snapTemp = cadaTagSnapshot.val();
+    data.forEach(function(cadaImgSnapshot) {
+      var snapTemp = cadaImgSnapshot.val();
       arreglo_imagenesPorTag.push(snapTemp);
     });
   }).then(function(data) {
-    res.json(arreglo_tags);
+    res.json(arreglo_imagenesPorTag);
   });
 });
 
