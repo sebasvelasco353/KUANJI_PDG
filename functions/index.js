@@ -59,7 +59,20 @@ app.get('/retreiveAllTags', function(req, res) {
 
 //------------ Function used for retreiving all image links from one specific tag in the format tag -> link 1, 2 ... n
 app.get('/retreiveSpecificTag', function(req, res) {
-
+  // arreglo donde guardo los links temporalmente para enviarlos
+  var arreglo_imagenesPorTag = [];
+  //get the tag needed
+var tagToBeSearched = req.query.toBeSearched;
+  // query for calling all images onspecific tag
+  const query = refTags.orderByChild(toBeSearched)
+    query.once("value", function(data) {
+    data.forEach(function(cadaImgTagSnapshot) {
+      var snapTemp = cadaTagSnapshot.val();
+      arreglo_imagenesPorTag.push(snapTemp);
+    });
+  }).then(function(data) {
+    res.json(arreglo_tags);
+  });
 });
 
 //Posts
