@@ -10,7 +10,7 @@ var refTags = db.ref('/tags');
 const clarifaiApp = new Clarifai.App({
   apiKey: 'b71dea8696994f2f896b4cfa9f667b7d'
 });
-
+const THRESHOLD = 0.98;
 
 //Gets
 //------------ Function used for predicting the image sent by the front end to firebase
@@ -18,8 +18,13 @@ app.get('/predict', function(req, res) {
   var toPredict = req.query.link; //https://samples.clarifai.com/metro-north.jpg
   clarifaiApp.models.predict(Clarifai.GENERAL_MODEL, toPredict).then(
     function(response) {
-      res.json(response.rawData.outputs);
-
+      // todos los tags
+      var tags = response.rawData.outputs[0].data.concepts;
+      // filtro por el threshold
+      var filtered = tags.filter(function (tag) {
+        return tag.value > THRESHOLD;
+      });
+      res.json(filtered);
       //TODO: take 3 tags with higher percentage of coincidense and also to filtering by: things that say no mus be taken out, like : no human or no pet
     },
     function(err) {
