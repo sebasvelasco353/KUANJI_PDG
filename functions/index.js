@@ -10,7 +10,8 @@ var refTags = db.ref('/tags');
 const clarifaiApp = new Clarifai.App({
   apiKey: 'b71dea8696994f2f896b4cfa9f667b7d'
 });
-const THRESHOLD = 0.98;
+var threshold = 0.90;
+const MAXPREDICTION = 3;
 
 //Gets
 //------------ Function used for predicting the image sent by the front end to firebase
@@ -22,8 +23,18 @@ app.get('/predict', function(req, res) {
       var tags = response.rawData.outputs[0].data.concepts;
       // filtro por el threshold
       var filtered = tags.filter(function (tag) {
-        return tag.value > THRESHOLD;
+        if (tag.value > threshold && !tag.name.includes("Ninguna persona")) {
+          return true;
+        } else {
+          return false;
+        }
       });
+
+      var cantidadPorEliminar = filtered.length - MAXPREDICTION;
+      if (cantidadPorEliminar > 0) {
+        filtered.splice(3, cantidadPorEliminar);
+      }
+      // console.log(filtered);
       res.json(filtered);
       //TODO: take 3 tags with higher percentage of coincidense and also to filtering by: things that say no mus be taken out, like : no human or no pet
     },
