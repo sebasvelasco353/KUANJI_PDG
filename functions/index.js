@@ -16,7 +16,7 @@ const MAXPREDICTION = 3;
 //Gets
 //------------ Function used for predicting the image sent by the front end to firebase
 app.get('/predict', function(req, res) {
-  var toPredict = req.query.link; //https://samples.clarifai.com/metro-north.jpg
+  var toPredict = req.query.link;
   clarifaiApp.models.predict(Clarifai.GENERAL_MODEL, toPredict).then(
     function(response) {
       // todos los tags
@@ -34,9 +34,29 @@ app.get('/predict', function(req, res) {
       if (cantidadPorEliminar > 0) {
         filtered.splice(3, cantidadPorEliminar);
       }
-      // console.log(filtered);
-      res.json(filtered);
-      //TODO: take 3 tags with higher percentage of coincidense and also to filtering by: things that say no mus be taken out, like : no human or no pet
+
+      // Temporal image with the tags
+      var imgTemp = {
+        link: toPredict,
+        tag1: filtered[0].name,
+        tag2: filtered[1].name,
+        tag3: filtered[2].name,
+      }
+
+      var tempLink = {
+        link: toPredict,
+      }
+
+      //add the imgLink json to the links on db
+      refLinks.push(imgTemp);
+      //Add the link to the corresponding tag on db
+      refTags.child(filtered[0].name).push(tempLink);
+      refTags.child(filtered[1].name).push(tempLink);
+      refTags.child(filtered[2].name).push(tempLink);
+
+
+      res.send("added " + imgTemp + "To db successfully");
+      //TODO: add the tags and img to db
     },
     function(err) {
       // there was an error
@@ -65,7 +85,11 @@ app.get('/getAllTags', function(req, res) {
   var arreglo_tags = [];
   refTags.once("value", function(data) {
     data.forEach(function(cadaTagSnapshot) {
-      var snapTemp = cadaTagSnapshot.val();
+      var tagPadre = cadaTagSnapshot.key;
+      var snapTemp = {
+        tag: tagPadre,
+        link: cadaTagSnapshot.val(),
+      }
       arreglo_tags.push(snapTemp);
     });
   }).then(function(data) {
@@ -90,19 +114,5 @@ app.get('/getSpecificTag', function(req, res) {
     res.json(arreglo_imagenesPorTag);
   });
 });
-
-//Posts
-//------------ Function used for adding the tags of the image to the tags on the database
-app.post('/addTagsToDb', function(req, res) {
-
-});
-
-
-//------------ Function used for adding the link of the image to the links on the database
-app.post('/addLinksToDb', function(req, res) {
-
-});
-
-
 
 exports.app = functions.https.onRequest(app);
