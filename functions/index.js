@@ -104,8 +104,8 @@ app.get('/getSpecificTag', function(req, res) {
   //get the tag needed
   var tagSearch = req.query.tagSearch;
   // query for calling all images onspecific tag
-  const query = refTags.orderByChild('tag').equalTo(tagSearch);
-    query.once("value", function(data) {
+  const query = refTags.ref.child(tagSearch);
+  query.once("value", function(data) {
     data.forEach(function(cadaImgSnapshot) {
       var snapTemp = cadaImgSnapshot.val();
       arreglo_imagenesPorTag.push(snapTemp);
